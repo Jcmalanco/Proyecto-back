@@ -9,17 +9,17 @@ const repo = new UsersRepository();
 async function loginUser(req, res) {
   const { email, password } = req.body;
 
-  if (!email || !password) {
+  if (!email || !password) { // si no hay email o password
     return res.status(400).json({ error: 'Email y password requeridos' });
   }
 
-  const user = await repo.findByEmail(email);
+  const user = await repo.findByEmail(email); // busca por email
 
   if (!user) {
     return res.status(401).json({ error: 'Credenciales incorrectas' });
   }
 
-  const ok = await bcrypt.compare(password, user.password);
+  const ok = await bcrypt.compare(password, user.password); // compara password
 
   if (!ok) {
     return res.status(401).json({ error: 'Credenciales incorrectas' });
@@ -28,7 +28,7 @@ async function loginUser(req, res) {
   const token = sign({
     id: user.id,
     role: user.role
-  });
+  });// genera token
 
   return res.json({
     token,
@@ -36,7 +36,7 @@ async function loginUser(req, res) {
       id: user.id,
       nombre: user.nombre,
       role: user.role
-    }
+    }// devuelve token y datos del usuario
   });
 }
 
