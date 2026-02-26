@@ -9,7 +9,7 @@ describe('validarBoleta', () => {
       categoria: 'Joyeria',
       prestamo: 500,
       interes: 0.1,
-      plazo_dias: 180,
+      plazo_meses: 18,
       fecha_empeno: '2024-01-10'
     };
 

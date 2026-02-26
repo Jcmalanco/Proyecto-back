@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
@@ -7,7 +6,6 @@ const { pool } = require('./src/db');
 const { authMiddleware } = require('./src/middlewares/auth');
 const { router: boletasRouter } = require('./src/routes/boletas.routes');
 const { router: usersRouter } = require('./src/routes/users.routes');
-const { errorHandler } = require('./src/middlewares/error.middleware');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -55,6 +53,10 @@ app.get('/privado', authMiddleware, (req, res) => {
   });
 });
 
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
+
 app.get('/health', async (req, res) => {
   try {
     await pool.query('select 1');
@@ -73,9 +75,5 @@ app.get('/health/db', async (req, res) => {
     return res.status(500).json({ ok: false, error: 'DB no disponible' });
   }
 });
-
+const { errorHandler } = require('./src/middlewares/error.middleware');
 app.use(errorHandler);
-
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
