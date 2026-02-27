@@ -15,7 +15,7 @@ class BoletasRepository {
 
   async getById(id) {
     const { rows } = await pool.query(
-      'SELECT * FROM boletas WHERE id = $1',
+      'SELECT * FROM boletas WHERE id = $1 ORERDER BY fecha_empeno DESC',
       [id]
     );
 
