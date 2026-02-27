@@ -52,6 +52,14 @@ async function getBoletasByUser(req, res) {
   }
 }
 
+async function me(req, res) {
+  return res.json({
+    id: req.user.id,
+    email: req.user.email,
+    role: req.user.role
+  });
+}
+
 // Crear usuario
 async function create(req, res) {
   try {
@@ -101,4 +109,4 @@ async function create(req, res) {
   }
 }
 
-module.exports = {loginUser,getBoletasByUser, create};
+module.exports = {loginUser, getBoletasByUser, create, me};
