@@ -1,4 +1,5 @@
 // Validación para crear usuario
+
 function validarUsuario(data) {
   const { nombre, email, telefono, password, role } = data;
 
