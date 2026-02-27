@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const { sign } = require('../middlewares/auth');
 const { validarUsuario } = require('../domain/users.rules');
 const { UsersRepository } = require('../repositories/users.repository');
+const { EmailDup } = require('../middlewares/error.middleware');
 
 const repo = new UsersRepository();
 
@@ -40,32 +41,64 @@ async function loginUser(req, res) {
   });
 }
 
-// Crear usuario
-async function create(req, res) {
-  const { nombre, email, password, telefono, role } = req.body;
+async function getBoletasByUser(req, res) {
+  const userId = req.user.id;
 
-  // Validar usuario
-  const validation = validarUsuario({ nombre, email, password, telefono, role });
-  if (validation.error) {
-    return res.status(400).json({ error: validation.error });
+  try {
+    const boletas = await repo.getBoletasByUserId(userId);
+    return res.json(boletas);
+  } catch (error) {
+    return res.status(500).json({ error: 'Error al obtener boletas del usuario' });
   }
-
-  const { data } = validation;
-
-  const passwordHash = await bcrypt.hash(data.password, 10);
-
-  const user = await repo.create({
-    nombre: data.nombre,
-    email: data.email,
-    telefono: data.telefono,
-    password: passwordHash,
-    role: data.role
-  });
-
-  return res.status(201).json({
-    ok: true,
-    user
-  });
 }
 
-module.exports = {loginUser, create};
+// Crear usuario
+async function create(req, res) {
+  try {
+    const {
+      nombre,
+      email,
+      password,
+      telefono,
+      role
+    } = req.body;
+
+    if (role === 'admin' || role && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'No autorizado para crear admin' });
+    }
+    if (role === 'empleado' || role && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'No autorizado para crear empleado' });
+    }
+
+    // Validación básica
+    if (!nombre || !email || !password || !role) {
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const user = await repo.create({
+      nombre,
+      email,
+      telefono,
+      password: passwordHash,
+      role
+    });
+
+    return res.status(201).json({
+      ok: true,
+      user
+    });
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+    
+      const errorEmailDuplicado = EmailDup(error);
+    
+      if (errorEmailDuplicado) {
+        return res.status(400).json(errorEmailDuplicado);
+      }
+    return res.status(500).json({ error: 'Error al crear usuario' });
+  }
+}
+
+module.exports = {loginUser,getBoletasByUser, create};

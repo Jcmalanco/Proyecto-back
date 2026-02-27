@@ -6,12 +6,24 @@ const repo = new BoletasRepository();
 
 // Obtener todas las boletas
 async function getAll(req, res) {
-  try {
-    const boletas = await repo.getAll();
-    return res.json(boletas);
-  } catch (error) {
-    return res.status(500).json({ error: 'Error al obtener boletas' });
+  let { page, limit } = req.query;
+
+  page = Number(page) || 1;
+  limit = Number(limit) || 10;
+
+  if (page < 1 || limit < 1 || limit > 100) {
+    return res.status(400).json({
+      error: 'Parámetros de paginación inválidos'
+    });
   }
+
+  const boletas = await repo.getAll({ page, limit });
+  return res.json({
+    page,
+    limit,
+    count: boletas.length,
+    data: boletas
+  });
 }
 
 // Obtener boleta por ID
@@ -31,38 +43,70 @@ async function getById(req, res) {
 }
 
 // Crear nueva boleta
+
 async function create(req, res) {
   try {
     const {
-      nombre_cliente,
+      cliente_id,
       descripcion,
       categoria,
       prestamo,
       plazo_meses
     } = req.body;
 
-    // Validación y lógica de negocio
-    const resultado = validarBoleta({
-      nombre_cliente,
-      descripcion,
-      categoria,
-      prestamo,
-      plazo_meses
+    const validation = validarBoleta({ 
+      cliente_id, 
+      descripcion, 
+      categoria, 
+      prestamo, 
+      plazo_meses 
     });
-
-    if (resultado.error) {
-      return res.status(400).json(resultado.error);
+    
+    if (validation.error) {
+      return res.status(400).json({ error: validation.error });
     }
 
-    // Guardar en base de datos
-    const nuevaBoleta = await repo.create(resultado.data);
+    const { data } = validation;
 
-    return res.status(201).json(nuevaBoleta);
+    const boleta = await repo.create({
+      cliente_id: data.cliente_id,
+      descripcion: data.descripcion,
+      categoria: data.categoria,
+      prestamo: data.prestamo,
+      plazo_meses: data.plazo_meses
+    });
+
+    return res.status(201).json({
+      ok: true,
+      boleta
+    });
   } catch (error) {
+    console.error('Error al crear boleta:', error);
     return res.status(500).json({ error: 'Error al crear boleta' });
   }
 }
 
+async function getByCliente(req, res) {
+  const clienteId = Number(req.params.clienteId);
+  let { page, limit } = req.query;
+
+  page = Number(page) || 1;
+  limit = Number(limit) || 10;
+
+  if (!Number.isInteger(clienteId)) {
+    return res.status(400).json({ error: 'cliente_id inválido' });
+  }
+
+  const boletas = await repo.getByClienteId(clienteId, { page, limit });
+
+  return res.json({
+    cliente_id: clienteId,
+    page,
+    limit,
+    total: boletas.length,
+    data: boletas
+  });
+}
 // Eliminar boleta
 async function remove(req, res) {
   try {
@@ -79,9 +123,4 @@ async function remove(req, res) {
   }
 }
 
-module.exports = {
-  getAll,
-  getById,
-  create,
-  remove
-};
+  module.exports = { getAll, getById, getByCliente, create, remove};

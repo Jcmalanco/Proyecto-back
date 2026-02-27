@@ -9,6 +9,7 @@ const router = express.Router();
 router.get('/', authMiddleware, asyncHandler(controller.getAll));
 router.get('/search', authMiddleware, asyncHandler(controller.search));
 router.get('/:id', authMiddleware, asyncHandler(controller.getById));
+router.get('/cliente/:clienteId', asyncHandler(controller.getByCliente));
 // POST
 router.post('/', authMiddleware, requireRole('admin', 'empleado'), asyncHandler(controller.create));
 // PUT

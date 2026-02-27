@@ -13,8 +13,6 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ error: 'Falta Authorization' });
   }
 
-  // Bearer sldkjf8sjeo8n8p94i3bu4bof3nhoo9
-
   const [type, token] = header.split(' ');
 
   if (type !== 'Bearer' || !token) {
