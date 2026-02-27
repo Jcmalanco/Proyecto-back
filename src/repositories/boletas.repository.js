@@ -6,7 +6,7 @@ class BoletasRepository {
     const offset = (page - 1) * limit;
 
     const { rows } = await pool.query(
-      'SELECT * FROM boletas ORDER BY fecha_empeno DESC LIMIT $1 OFFSET $2',
+      'SELECT * FROM boletas ORDER BY id DESC LIMIT $1 OFFSET $2',
       [limit, offset]
     );
 
@@ -15,7 +15,7 @@ class BoletasRepository {
 
   async getById(id) {
     const { rows } = await pool.query(
-      'SELECT * FROM boletas WHERE id = $1 ORERDER BY fecha_empeno DESC',
+      'SELECT * FROM boletas WHERE id = $1 ORERDER BY id DESC',
       [id]
     );
 
@@ -26,7 +26,7 @@ class BoletasRepository {
     const offset = (page - 1) * limit;
 
     const { rows } = await pool.query(
-      'SELECT * FROM boletas WHERE cliente_id = $1 ORDER BY fecha_empeno DESC LIMIT $2 OFFSET $3',
+      'SELECT * FROM boletas WHERE cliente_id = $1 ORDER BY id DESC LIMIT $2 OFFSET $3',
       [clienteId, limit, offset]
     );
     return rows;
