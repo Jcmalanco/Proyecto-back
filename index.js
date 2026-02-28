@@ -1,5 +1,5 @@
 const { router: boletasRouter } = require('./src/routes/boletas.routes');
-const { router: webhooksRouter } = require('./src/routes/webhooks.routes');
+//const { router: webhooksRouter } = require('./src/routes/webhooks.routes');
 const { router: pagosRouter } = require('./src/routes/pagos.routes');
 const { router: usersRouter } = require('./src/routes/users.routes');
 const { errorHandler } = require('./src/middlewares/error.middleware');
