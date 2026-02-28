@@ -1,6 +1,8 @@
 const { router: boletasRouter } = require('./src/routes/boletas.routes');
-const { errorHandler } = require('./src/middlewares/error.middleware');
+const { router: webhooksRouter } = require('./src/routes/webhooks.routes');
+const { router: pagosRouter } = require('./src/routes/pagos.routes');
 const { router: usersRouter } = require('./src/routes/users.routes');
+const { errorHandler } = require('./src/middlewares/error.middleware');
 const { authMiddleware } = require('./src/middlewares/auth');
 const rateLimit = require('express-rate-limit');
 const { pool } = require('./src/db');
@@ -10,21 +12,21 @@ const cors = require('cors');
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-const allowed = [
+const allowed = [ //origines permitidos
   'http://localhost:3000',
   'http://localhost:3001',
   'https://dfs-front.vercel.app'
 ];
 
-const limiter = rateLimit({
+const limiter = rateLimit({//limita a 100 solicitudes por IP cada 15 minutos
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: 'Demasiadas solicitudes, por favor intente de nuevo más tarde.'
 });
 
-app.use(limiter);
+app.use(limiter); //aplica el limitador a todas las rutas
 
-app.use(cors({
+app.use(cors({ //configura CORS para permitir solo los orígenes especificados
   origin: function (origin, cb) {
     if (!origin) return cb(null, true);
     if (allowed.includes(origin)) return cb(null, true);
@@ -32,7 +34,7 @@ app.use(cors({
   }
 }));
 
-app.use(express.json());
+app.use(express.json()); //para parsear JSON en el body de las solicitudes
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
@@ -45,7 +47,8 @@ app.get('/', (req, res) => {
 
 app.use('/boletas', boletasRouter);
 app.use('/users', usersRouter);
-
+app.use('/pagos', pagosRouter);
+app.use('/webhooks', webhooksRouter);
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);

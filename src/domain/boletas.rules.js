@@ -1,80 +1,86 @@
-function validarBoleta(data) {
-  const {
-    cliente_id,
-    descripcion,
-    categoria,
-    prestamo,
-    plazo_meses
-  } = data;
-
-  // Validar cliente_id como número (int8 en BD)
-  if (!cliente_id) {
-    return { error: { error: 'ID del cliente es requerido' } };
+async function validarBoleta(data) {
+  if (!data || Object.keys(data).length === 0) { // Verificar si data tiene contenido
+    return { error: 'No se recibió información de la boleta' };
   }
-  
+
+  const { cliente_id, descripcion, categoria, prestamo, plazo_meses } = data;
+
+  if (!cliente_id) { // Verificar que cliente_id esté presente
+    return { error: 'ID del cliente es requerido' };
+  }
+
   const clienteIdNum = Number(cliente_id);
-  if (isNaN(clienteIdNum) || clienteIdNum <= 0) {
-    return { error: { error: 'ID del cliente debe ser un número válido' } };
+  if (!Number.isInteger(clienteIdNum) || clienteIdNum <= 0) {// Verificar que cliente_id sea un número entero positivo
+    return { error: 'ID del cliente inválido' };
   }
 
-  // Validar descripción
-  if (!descripcion || typeof descripcion !== 'string' || descripcion.trim() === '') {
-    return { error: { error: 'Descripción inválida' } };
+  if (!descripcion || typeof descripcion !== 'string') {// Verificar que descripción sea una cadena de texto
+    return { error: 'Descripción inválida' };
   }
 
-  // Validar categoría
-  if (!categoria || typeof categoria !== 'string' || categoria.trim() === '') {
-    return { error: { error: 'Categoría inválida' } };
+  if (!categoria || typeof categoria !== 'string') {// Verificar que categoría sea una cadena de texto
+    return { error: 'Categoría inválida' };
   }
 
-  // Validar préstamo (convertir a número)
   const prestamoNum = Number(prestamo);
-  if (isNaN(prestamoNum) || prestamoNum <= 0) {
-    return { error: { error: 'Préstamo debe ser un número válido mayor a 0' } };
+  if (isNaN(prestamoNum) || prestamoNum <= 0) {// Verificar que préstamo sea un número positivo
+    return { error: 'Préstamo inválido' };
   }
 
-  // Validar plazo_meses (convertir a número entero)
   const plazoNum = Number(plazo_meses);
-  if (isNaN(plazoNum) || !Number.isInteger(plazoNum) || plazoNum <= 0) {
-    return { error: { error: 'Plazo en meses debe ser un número entero válido mayor a 0' } };
+  if (!Number.isInteger(plazoNum) || plazoNum <= 0) {// Verificar que plazo_meses sea un número entero positivo
+    return { error: 'Plazo inválido' };
   }
 
-  // Definir interés según categoría (debe coincidir con el repositorio)
-  const interesesPorCategoria = {
-    'electronica': 8,
-    'joyas': 5,
-    'herramientas': 10,
-    'vehiculos': 4,
-    'ropa': 7,
-    'general': 6
+  const intereses = {// Intereses por categoría
+    electronica: 8,
+    joyas: 5,
+    herramientas: 10,
+    vehiculos: 4,
+    ropa: 7,
+    general: 6
   };
 
-  const interes = interesesPorCategoria[categoria.toLowerCase()] || 6;
-  
-  // Calcular total préstamo con interés
-  const totalPrestamo = prestamoNum + (prestamoNum * interes / 100);
-  
-  // Calcular fecha de vencimiento
-  const fechaEmpeno = new Date();
-  const fechaVencimiento = new Date(fechaEmpeno);
-  fechaVencimiento.setMonth(fechaVencimiento.getMonth() + plazoNum);
+  const interes = intereses[categoria.toLowerCase()] ?? 6;// Interés por defecto 6% si categoría no coincide
+
+  const totalPrestamo = prestamoNum + (prestamoNum * interes / 100);// Cálculo del total a pagar (préstamo + interés)
+
+  const fechaEmpeno = new Date();// Fecha actual como fecha de empeño
+  const fechaVencimiento = new Date(fechaEmpeno);// Fecha de vencimiento calculada sumando los meses del plazo al fecha de empeño
+  fechaVencimiento.setMonth(fechaVencimiento.getMonth() + plazoNum);// Ajuste para casos donde el día del mes no existe en el mes de vencimiento
 
   return {
     data: {
       cliente_id: clienteIdNum,
       descripcion: descripcion.trim(),
-      categoria: categoria.trim().toLowerCase(),
+      categoria: categoria.toLowerCase(),
       prestamo: prestamoNum,
-      interes,                    // Agregado
+      interes,
       plazo_meses: plazoNum,
-      fecha_empeno: fechaEmpeno.toISOString().split('T')[0], // Solo YYYY-MM-DD
-      fecha_vencimiento: fechaVencimiento.toISOString().split('T')[0], // Solo YYYY-MM-DD
       estado: 'activa',
+      fecha_empeno: fechaEmpeno,
+      fecha_vencimiento: fechaVencimiento,
+      total_prestamo: totalPrestamo,
       total_pagado: 0,
-      total_prestamo: totalPrestamo,  // Agregado
-      saldo_pendiente: totalPrestamo   // Agregado
+      saldo_pendiente: totalPrestamo
     }
   };
 }
 
-module.exports = { validarBoleta };
+async function validarCancelacion(boleta) {
+  if (!boleta) {
+    return { error: 'Boleta no encontrada' };
+  }
+
+  if (boleta.estado === 'cancelada') {
+    return { error: 'La boleta ya está cancelada' };
+  }
+
+  if (boleta.estado === 'pagada') {
+    return { error: 'No se puede cancelar una boleta que ya fue pagada' };
+  }
+
+  return { success: true };
+}
+
+module.exports = { validarBoleta, validarCancelacion };

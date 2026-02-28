@@ -3,3 +3,6 @@
 node_modules/
 .DS_Store
 dist/
+src/controllers/webhooks.controller.js
+src/domain/webhooks.rules.js
+src/routes/webhooks.routes.js
