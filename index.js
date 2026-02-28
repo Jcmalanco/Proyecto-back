@@ -48,7 +48,7 @@ app.get('/', (req, res) => {
 app.use('/boletas', boletasRouter);
 app.use('/users', usersRouter);
 app.use('/pagos', pagosRouter);
-app.use('/webhooks', webhooksRouter);
+//app.use('/webhooks', webhooksRouter);
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
