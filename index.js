@@ -15,7 +15,7 @@ const app = express();
 const allowed = [ //origines permitidos
   'http://localhost:3000',
   'http://localhost:3001',
-  'https://dfs-front.vercel.app'
+  'https://proyecto-fornt.vercel.app/'
 ];
 
 const limiter = rateLimit({//limita a 100 solicitudes por IP cada 15 minutos

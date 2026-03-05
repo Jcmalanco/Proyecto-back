@@ -36,7 +36,6 @@ const loginUser = async (req, res) => { // Log in
   });
 };
 
-
 const me = async (req, res) => { // Info del usuario autenticado (sin password)
   res.json({
     id: req.user.id,
@@ -44,7 +43,6 @@ const me = async (req, res) => { // Info del usuario autenticado (sin password)
     role: req.user.role
   });
 };
-
 
 const create = async (req, res) => { // Crear usuario
   const validation = validarUsuario(req.body);

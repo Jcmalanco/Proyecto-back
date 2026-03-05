@@ -23,7 +23,7 @@ function validarUsuario(data) {
   }
 
   if (!['admin', 'empleado', 'cliente'].includes(role)) {
-    return { error: 'Rol inválido' };
+    return { error:'Rol inválido' };
   }
 
   return {
