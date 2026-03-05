@@ -15,7 +15,7 @@ const app = express();
 const allowed = [ //origines permitidos
   'http://localhost:3000',
   'http://localhost:3001',
-  'https://proyecto-fornt.vercel.app/',
+  'https://proyecto-fornt.vercel.app',
   'https://proyecto-fornt.vercel.app/login',
   'https://proyecto-fornt.vercel.app/boletas'
 ];
